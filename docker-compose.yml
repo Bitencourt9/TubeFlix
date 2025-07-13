@@ -1,29 +1,28 @@
-version: '3.8' # Versão da sintaxe do Docker Compose
+version: '3.8'
 
 services:
-  web: # Este é o serviço do seu aplicativo Django
-    build: . # Indica que o Docker deve construir a imagem a partir do Dockerfile no diretório atual
-    # O comando abaixo executa as migrações e então inicia o servidor Gunicorn
-    # O sh -c é usado para executar múltiplos comandos sequencialmente
-    command: sh -c "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 tubeflix.wsgi:application"
+  web:
+    build: .
+    command: sh -c "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn --bind 0.0.0.0:8000 tubeflix.wsgi:application"
     volumes:
-      - .:/app # Monta o diretório do seu projeto localmente dentro do contêiner.
-               # Isso permite que você edite o código na sua máquina e veja as mudanças no contêiner sem reconstruir a imagem.
-      - media_data:/app/media # Volume para persistir os uploads de mídia, mesmo se o contêiner for recriado
+      - .:/app
+      - media_data:/app/media
+      - static_data:/app/staticfiles
     ports:
-      - "8000:8000" # Mapeia a porta 8000 do contêiner para a porta 8000 da sua máquina (para acesso via navegador)
+      - "8000:8000"
     env_file:
-      - .env # Carrega variáveis de ambiente de um arquivo .env na raiz do projeto
+      - .env
     depends_on:
-      - db # Garante que o serviço 'db' (banco de dados) seja iniciado antes do serviço 'web'
+      - db
 
-  db: # Este é o serviço do seu banco de dados PostgreSQL
-    image: postgres:15-alpine # Usa uma imagem oficial do PostgreSQL, versão 15, otimizada para ser leve
+  db:
+    image: postgres:15-alpine
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Volume para persistir os dados do banco de dados (evita perder dados ao reiniciar contêiner)
+      - postgres_data:/var/lib/postgresql/data
     env_file:
-      - .env # Também carrega variáveis de ambiente do .env para as credenciais do banco
+      - .env
 
-volumes: # Define os volumes nomeados para persistência de dados
-  postgres_data: # Volume para os dados do PostgreSQL
-  media_data:    # Volume para os uploads de mídia (vídeos, thumbnails)
+volumes:
+  postgres_data:
+  media_data:
+  static_data:

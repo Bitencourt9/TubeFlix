@@ -12,11 +12,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
-from dotenv import load_dotenv # <-- NOVA LINHA: Importa load_dotenv
+from dotenv import load_dotenv
 
-# Carrega as variáveis de ambiente do arquivo .env
-# Certifique-se de que o arquivo .env está na raiz do seu projeto
-load_dotenv() # <-- NOVA LINHA: Carrega as variáveis de ambiente
+load_dotenv()
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -35,7 +33,6 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default-insecure-key-for-dev-only-change-t
 # Lendo DEBUG das variáveis de ambiente. Converte '1' para True e '0' para False.
 DEBUG = os.getenv('DEBUG', '0') == '1'
 
-# Lendo ALLOWED_HOSTS das variáveis de ambiente, separando por vírgula
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 
@@ -84,17 +81,14 @@ TEMPLATES = [
 WSGI_APPLICATION = 'tubeflix.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-# MUDANÇA CRÍTICA AQUI: Usando PostgreSQL com variáveis de ambiente do Docker Compose
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql', # Define o engine para PostgreSQL
-        'NAME': os.getenv('POSTGRES_DB'),         # Nome do BD, lido do .env
-        'USER': os.getenv('POSTGRES_USER'),       # Usuário do BD, lido do .env
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD'), # Senha do BD, lida do .env
-        'HOST': os.getenv('POSTGRES_HOST'),       # Host do BD, lido do .env (será 'db' por causa do docker-compose.yml)
-        'PORT': os.getenv('POSTGRES_PORT'),       # Porta do BD, lida do .env
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
+        'PORT': os.getenv('POSTGRES_PORT'),
     }
 }
 
@@ -134,7 +128,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-# STATIC_ROOT = BASE_DIR / 'staticfiles' # Descomente e configure para produção
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/videos/profile/'
 
