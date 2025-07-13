@@ -13,7 +13,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      db: # AQUI ESTÁ A MUDANÇA: Agora o 'web' espera que o 'db' esteja saudável
+        condition: service_healthy
 
   db:
     image: postgres:15-alpine
@@ -21,6 +22,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env
+    healthcheck: # <-- NOVO: Define um healthcheck para o serviço de banco de dados
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"] # Comando para verificar se o BD está pronto
+      interval: 5s # Verifica a cada 5 segundos
+      timeout: 5s # Tempo limite para o comando
+      retries: 5 # Número de tentativas antes de considerar o serviço não saudável
+      start_period: 10s # Período inicial para o serviço iniciar antes de começar a checar
 
 volumes:
   postgres_data:
