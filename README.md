@@ -3,6 +3,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellowgreen" alt="Status do Projeto">
   <img src="https://img.shields.io/badge/Tecnologias-HTML%20%7C%20CSS%20%7C%20Django-blue" alt="Tecnologias">
+  <img src="https://img.shields.io/badge/Licen%C3%A7a-MIT-green" alt="Licença">
 </p>
 
 ---
@@ -63,20 +64,20 @@ Certifique-se de ter instalado:
     ```bash
     python -m venv venv
     ```
-    * **No Windows:**
+    * **No Windows (PowerShell):**
         ```bash
         .\venv\Scripts\activate
         ```
-    * **No macOS/Linux:**
+    * **No macOS/Linux/Git Bash:**
         ```bash
         source venv/bin/activate
         ```
 
 3.  **Instale as dependências:**
+    Com seu ambiente virtual ativo, instale todas as bibliotecas necessárias listadas no `requirements.txt`:
     ```bash
     pip install -r requirements.txt
     ```
-    *(**Nota:** Se você ainda não tem um `requirements.txt`, pode criá-lo com `pip freeze > requirements.txt` após instalar Django e Pillow)*
 
 4.  **Execute as migrações do banco de dados:**
     ```bash
@@ -87,7 +88,7 @@ Certifique-se de ter instalado:
     ```bash
     python manage.py createsuperuser
     ```
-    Siga as instruções para criar seu usuário e senha.
+    Siga as instruções no terminal para criar seu usuário e senha.
 
 6.  **Inicie o servidor de desenvolvimento:**
     ```bash
