@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ video.title }} - TubeFlix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Cores base da Netflix (mantidas do home.html) */
+        :root {
+            --netflix-red: #e50914;
+            --netflix-dark: #141414;
+            --text-light: #e5e5e5;
+            --text-gray: #a3a3a3;
+            --card-background: #222; /* Fundo dos cards/elementos */
+            --border-color: #333; /* Cor das bordas e divisores */
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            background-color: var(--netflix-dark);
+            color: var(--text-light);
+        }
+
+        .container {
+            max-width: 1200px; /* Ajustado para ser um pouco mais largo para o layout de 2 colunas */
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--netflix-dark); /* Fundo escuro */
+            box-shadow: none; /* Remove sombra do container principal se não precisar */
+        }
+
+        h1, h2, h3 {
+            color: var(--text-light);
+            font-weight: 700;
+        }
+        h1 { font-size: 2.2em; margin-bottom: 15px; }
+        h2 { font-size: 1.8em; margin-bottom: 20px; }
+        h3 { font-size: 1.4em; margin-bottom: 15px; }
+        p { color: var(--text-light); line-height: 1.6; font-weight: 300; } /* Descrição do vídeo mais leve */
+
+        a { color: var(--netflix-red); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* --- Botões de navegação (Header) --- */
+        .nav-buttons {
+            display: flex;
+            justify-content: flex-start; /* Alinha à esquerda */
+            align-items: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color); /* Linha divisória */
+        }
+        .nav-buttons a {
+            background-color: var(--card-background); /* Fundo dos botões */
+            color: var(--text-light);
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 400;
+            display: inline-block;
+            margin-right: 15px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 0.95em;
+        }
+        .nav-buttons a:hover {
+            background-color: #333; /* Escurece no hover */
+            transform: translateY(-2px);
+        }
+        /* Específico para o botão de perfil para diferenciá-lo se quiser */
+        .nav-buttons a.profile-button {
+             background-color: #007bff; /* Pode manter azul ou mudar para um tom de vermelho/cinza */
+        }
+        .nav-buttons a.profile-button:hover { background-color: #0056b3; }
+
+
+        .video-container {
+            display: flex;
+            gap: 30px; /* Mais espaçamento entre as colunas */
+            margin-top: 30px;
+            flex-wrap: wrap; /* Permite quebrar linha em telas menores */
+        }
+        .main-content {
+            flex: 2; /* Ocupa mais espaço que a sidebar */
+            min-width: 400px; /* Garante que não fique muito pequeno em telas médias */
+        }
+
+        .video-player-wrapper {
+            width: 100%;
+            padding-top: 56.25%; /* Proporção 16:9 */
+            position: relative;
+            margin-bottom: 20px; /* Mais espaçamento abaixo do player */
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #000; /* Fundo preto para o player/placeholder */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .video-player-wrapper video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Ajusta o vídeo dentro da área */
+        }
+        .video-placeholder-text {
+            position: absolute;
+            color: var(--text-gray);
+            font-weight: bold;
+            font-size: 1.8em; /* Texto maior */
+            text-align: center;
+        }
+
+        .video-description {
+            font-size: 1em;
+            color: var(--text-gray); /* Descrição em cinza */
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        hr { border: 0; border-top: 1px solid var(--border-color); margin: 30px 0; }
+
+        /* --- Estilos para likes e visualizações --- */
+        .video-actions {
+            margin-top: 20px; /* Mais espaçamento */
+            display: flex;
+            align-items: center;
+            gap: 20px; /* Mais espaçamento entre os itens */
+            flex-wrap: wrap;
+            padding-bottom: 20px; /* Espaçamento antes da linha divisória */
+            border-bottom: 1px solid var(--border-color); /* Linha abaixo das ações */
+        }
+        .video-actions span {
+            font-size: 1.1em;
+            color: var(--text-gray); /* Texto em cinza */
+            font-weight: 300;
+        }
+        .video-actions form {
+            display: inline-block;
+            margin: 0;
+        }
+        .video-actions button {
+            padding: 10px 20px; /* Mais padding */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 700; /* Texto em negrito */
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 1em;
+        }
+        .video-actions button[type="submit"] {
+            background-color: var(--netflix-red); /* Curtir em vermelho Netflix */
+            color: white;
+        }
+        .video-actions button[type="submit"]:hover { background-color: #ff000e; transform: translateY(-2px); }
+        .video-actions button[type="submit"].dislike-button {
+            background-color: var(--text-gray); /* Descurtir em cinza */
+            color: var(--netflix-dark);
+        }
+        .video-actions button[type="submit"].dislike-button:hover { background-color: #888; transform: translateY(-2px); }
+        .video-actions .login-prompt {
+            color: var(--text-gray);
+            font-size: 0.9em;
+        }
+
+
+        /* --- Estilos para mensagens do Django --- */
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+        .messages li {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-weight: 400;
+            font-size: 0.95em;
+        }
+        .messages li.success { background-color: #4CAF50; color: white; border: none; } /* Verde para sucesso */
+        .messages li.error { background-color: #f44336; color: white; border: none; } /* Vermelho para erro */
+        .messages li.warning { background-color: #ff9800; color: white; border: none; } /* Laranja para aviso */
+
+        /* --- Seção de comentários --- */
+        .comments-section {
+            margin-top: 40px; /* Mais espaçamento */
+        }
+        .comments-section h2 { margin-bottom: 25px; }
+        .add-comment {
+            margin-bottom: 30px;
+            padding: 20px; /* Mais padding */
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--card-background); /* Fundo do formulário */
+        }
+        .add-comment h3 { margin-top: 0; color: var(--text-light); }
+        .add-comment form { display: flex; flex-direction: column; gap: 15px; }
+        .add-comment textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #555; /* Borda mais escura */
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box;
+            background-color: #333; /* Fundo do textarea */
+            color: var(--text-light);
+            resize: vertical; /* Permite redimensionar apenas verticalmente */
+        }
+        .add-comment textarea::placeholder {
+            color: var(--text-gray);
+        }
+        .add-comment button {
+            background-color: var(--netflix-red);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            align-self: flex-end;
+            width: auto;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-weight: 700;
+        }
+        .add-comment button:hover { background-color: #ff000e; transform: translateY(-2px); }
+
+        .comments-list { margin-top: 20px; }
+        .comment-item {
+            border: 1px solid var(--border-color);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background-color: var(--card-background); /* Fundo do comentário */
+        }
+        .comment-item p { margin: 0; color: var(--text-light); }
+        .comment-item strong { color: var(--netflix-red); /* Nome do usuário em vermelho */ font-weight: 700;}
+        .comment-item small { color: var(--text-gray); float: right; font-size: 0.85em;} /* Data/hora em cinza */
+
+        /* --- Barra lateral de outros vídeos --- */
+        aside {
+            flex: 1; /* Ocupa 1 parte do espaço flex */
+            min-width: 280px; /* Garante que não fique muito pequeno */
+            padding-left: 30px; /* Mais padding */
+            border-left: 1px solid var(--border-color); /* Linha divisória mais escura */
+        }
+        aside h3 { margin-top: 0; color: var(--text-light); }
+        aside ul { list-style: none; padding: 0; }
+        aside li { margin-bottom: 20px; /* Mais espaçamento entre os vídeos */ }
+        aside li a {
+            display: flex;
+            align-items: flex-start; /* Alinha o texto ao topo da thumbnail */
+            gap: 15px; /* Mais espaçamento */
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s ease;
+        }
+        aside li a:hover { transform: translateX(5px); /* Efeito sutil ao passar o mouse */ }
+        aside li img {
+            width: 120px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 4px;
+            flex-shrink: 0; /* Impede que a imagem encolha */
+        }
+        aside li span {
+            font-size: 0.9em;
+            color: var(--text-light); /* Título em branco */
+            line-height: 1.3;
+            font-weight: 400;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box; /* Para múltiplas linhas ellipsis */
+            -webkit-line-clamp: 3; /* Limita a 3 linhas */
+            -webkit-box-orient: vertical;
+        }
+
+        /* Placeholder para thumbnail de outros vídeos na sidebar */
+        .sidebar-thumbnail-placeholder {
+            width: 120px;
+            height: 70px;
+            background-color: #333; /* Fundo mais escuro para o placeholder */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        .sidebar-thumbnail-placeholder span {
+            font-size: 0.75em;
+            color: var(--text-gray);
+            text-align: center;
+            line-height: 1.2;
+            padding: 5px; /* Adiciona um pouco de padding para o texto */
+        }
+
+        /* --- Responsividade --- */
+        @media (max-width: 992px) {
+            .video-container {
+                flex-direction: column; /* Em telas menores, sidebar vai para baixo */
+            }
+            .main-content {
+                min-width: unset; /* Remove min-width */
+            }
+            aside {
+                border-left: none; /* Remove borda lateral */
+                padding-left: 0;
+                margin-top: 40px; /* Espaçamento entre o conteúdo principal e a sidebar */
+                border-top: 1px solid var(--border-color); /* Linha divisória no topo */
+                padding-top: 30px;
+            }
+            aside h3 { margin-bottom: 20px; }
+            aside ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; } /* Grid para outros vídeos */
+            aside li { margin-bottom: 0; } /* Remove margem inferior padrão */
+            aside li a {
+                flex-direction: column; /* Thumbnail acima do título */
+                text-align: center;
+                gap: 10px;
+            }
+            aside li img, .sidebar-thumbnail-placeholder {
+                width: 100%; /* Imagem/placeholder ocupa 100% da largura do item de grid */
+                height: 140px; /* Altura maior para a thumbnail */
+                object-fit: cover;
+            }
+            aside li span {
+                text-align: center;
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            h1 { font-size: 1.8em; }
+            h2 { font-size: 1.5em; }
+            h3 { font-size: 1.2em; }
+            .nav-buttons {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .nav-buttons a {
+                margin-right: 0;
+                width: 100%;
+                text-align: center;
+            }
+            .video-actions {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .video-actions button {
+                width: 100%;
+            }
+            .add-comment button {
+                width: 100%;
+            }
+            aside ul {
+                grid-template-columns: 1fr; /* Uma coluna para outros vídeos em telas menores */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-buttons">
+            <a href="{% url 'home' %}">← Voltar para o Hub</a>
+            <a href="{% url 'user_profile' %}" class="profile-button">Meu Perfil</a>
+        </div>
+
+        <h1>{{ video.title }}</h1>
+
+        <div class="video-container">
+            <div class="main-content">
+                <div class="video-player-wrapper">
+                    <video controls
+                        {% if video.thumbnail %}
+                            poster="{{ video.thumbnail.url }}"
+                        {% endif %}
+                    >
+                      <source src="{{ video.file.url }}" type="video/mp4">
+                      Seu navegador não suporta vídeo HTML5.
+                    </video>
+                    {% if not video.thumbnail %}
+                        <span class="video-placeholder-text">Sem Thumbnail</span>
+                    {% endif %}
+                </div>
+                <p class="video-description">{{ video.description }}</p>
+
+                {# Likes e Visualizações #}
+                <div class="video-actions">
+                    <span>Visualizações: {{ video.views }}</span>
+                    <span>Curtidas: {{ video.likes.count }}</span>
+
+                    {% if user.is_authenticated %}
+                        {% if user_has_liked %}
+                            <form action="{% url 'like_video' video.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="dislike-button">Descurtir</button>
+                            </form>
+                        {% else %}
+                            <form action="{% url 'like_video' video.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit">Curtir</button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <span class="login-prompt">Faça login para curtir este vídeo.</span>
+                    {% endif %}
+                </div>
+
+                <hr>
+
+                {# SEÇÃO DE COMENTÁRIOS #}
+                <div class="comments-section">
+                    <h2>Comentários</h2>
+
+                    {% if messages %}
+                        <ul class="messages">
+                            {% for message in messages %}
+                                <li class="{{ message.tags }}">{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    {% if user.is_authenticated %}
+                        <div class="add-comment">
+                            <h3>Adicionar um Comentário</h3>
+                            <form method="post" action="{% url 'watch_video' video.id %}">
+                                {% csrf_token %}
+                                {{ comment_form.as_p }}
+                                <button type="submit">Publicar Comentário</button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <p class="add-comment-login-prompt">
+                            <a href="{% url 'login' %}?next={{ request.path }}">Faça login</a> para adicionar um comentário.
+                        </p>
+                    {% endif %}
+
+                    <div class="comments-list">
+                        {% if comments %}
+                            {% for comment in comments %}
+                                <div class="comment-item">
+                                    <p>
+                                        <strong>{{ comment.user.username }}</strong>
+                                        <small>{{ comment.created_at|date:"d/m/Y H:i" }}</small>
+                                    </p>
+                                    <p>{{ comment.text }}</p>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="no-comments-message">Nenhum comentário ainda. Seja o primeiro a comentar!</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {# FIM DA SEÇÃO DE COMENTÁRIOS #}
+
+            </div>
+
+            <aside>
+                <h3>Mais vídeos</h3>
+                <ul>
+                  {% for v in outros_videos %}
+                    <li>
+                      <a href="{% url 'watch_video' v.id %}">
+                        {% if v.thumbnail %}
+                          <img src="{{ v.thumbnail.url }}" alt="{{ v.title }}">
+                        {% else %}
+                          <div class="sidebar-thumbnail-placeholder">
+                              <span>Sem<br>Thumb</span>
+                          </div>
+                        {% endif %}
+                        <span>{{ v.title }}</span>
+                      </a>
+                    </li>
+                  {% endfor %}
+                </ul>
+            </aside>
+        </div>
+    </div>
+</body>
+</html>

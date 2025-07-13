@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enviar Novo Vídeo - TubeFlix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --netflix-red: #e50914;
+            --netflix-dark: #141414;
+            --text-light: #e5e5e5;
+            --text-gray: #a3a3a3;
+            --card-background: #222;
+            --border-color: #333;
+            --input-background: #333;
+            --button-primary: var(--netflix-red);
+            --button-primary-hover: #ff000e;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            background-color: var(--netflix-dark);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 90%;
+            margin: 0 auto;
+            background-color: var(--card-background);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 700;
+        }
+
+        p {
+            margin-bottom: 25px;
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 1.05em;
+        }
+
+        .container form p {
+            margin-bottom: 20px;
+            text-align: left;
+            color: var(--text-light);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 400;
+            color: var(--text-light);
+            font-size: 1.0em;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 0;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: var(--input-background);
+            color: var(--text-light);
+            font-size: 1em;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        input[type="text"]::placeholder,
+        textarea::placeholder {
+            color: var(--text-gray);
+        }
+        input[type="text"]:focus,
+        textarea:focus {
+            border-color: var(--netflix-red);
+            box-shadow: 0 0 8px rgba(229, 9, 20, 0.5);
+            outline: none;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px 0;
+            margin-bottom: 0;
+            border: none;
+            border-radius: 0;
+            background-color: transparent;
+            color: var(--text-light);
+            box-sizing: border-box;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        input[type="file"]::-webkit-file-upload-button {
+            background-color: var(--netflix-red);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease;
+        }
+        input[type="file"]::-webkit-file-upload-button:hover {
+            background-color: #ff000e;
+        }
+
+        button[type="submit"] {
+            background-color: var(--button-primary);
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            width: 100%;
+            font-weight: 700;
+            margin-top: 20px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        button[type="submit"]:hover {
+            background-color: var(--button-primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .errorlist {
+            color: var(--netflix-red);
+            list-style-type: none;
+            padding: 0;
+            margin-top: -15px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            font-weight: 400;
+        }
+        .errorlist li {
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            p {
+                font-size: 1em;
+            }
+            button[type="submit"] {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.6em;
+            }
+            input[type="text"],
+            textarea {
+                padding: 10px 12px;
+                font-size: 0.95em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Enviar Novo Vídeo</h1>
+        <p>Olá, {{ user.username }}! Preencha os detalhes para enviar seu vídeo.</p>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% for field in form %}
+                <p>
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small style="color: var(--text-gray); display: block; margin-top: 5px;">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </p>
+            {% endfor %}
+            <button type="submit">Enviar Vídeo</button>
+        </form>
+    </div>
+</body>
+</html>

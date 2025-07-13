@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - {{ user.username }} - TubeFlix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Cores base da Netflix */
+        :root {
+            --netflix-red: #e50914;
+            --netflix-dark: #141414;
+            --text-light: #e5e5e5;
+            --text-gray: #a3a3a3;
+            --card-background: #222; /* Fundo dos cards/elementos */
+            --border-color: #333; /* Cor das bordas e divisores */
+            --button-delete: #dc3545; /* Vermelho para botões de deletar */
+            --button-delete-hover: #c82333;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            background-color: var(--netflix-dark);
+            color: var(--text-light);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--netflix-dark);
+            box-shadow: none;
+        }
+
+        h1, h2 {
+            color: var(--text-light);
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        h1 { font-size: 2.5em; }
+        h2 { font-size: 1.8em; margin-top: 40px; }
+        p { color: var(--text-light); line-height: 1.6; font-weight: 300; }
+        a { color: var(--netflix-red); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* --- Botão Voltar para o Hub --- */
+        .back-button {
+            background-color: var(--card-background);
+            color: var(--text-light);
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 400;
+            display: inline-block;
+            margin-bottom: 30px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 0.95em;
+        }
+        .back-button:hover {
+            background-color: #333;
+            transform: translateY(-2px);
+        }
+
+        /* --- Header do Perfil --- */
+        .profile-header {
+            text-align: left; /* Alinhamento à esquerda */
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .profile-header h1 {
+            color: var(--text-light);
+            font-size: 2.8em; /* Título maior para o perfil */
+            margin-bottom: 5px;
+        }
+        .profile-header p {
+            color: var(--text-gray); /* Descrição em cinza */
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        .profile-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .profile-buttons .button,
+        .profile-buttons .logout-button {
+            background-color: var(--netflix-red);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 400;
+            display: inline-block;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 0.95em;
+            border: none;
+            cursor: pointer;
+        }
+        .profile-buttons .button.upload { background-color: #4CAF50; } /* Verde para upload */
+        .profile-buttons .logout-button { background-color: #f44336; } /* Vermelho para sair */
+
+        .profile-buttons .button:hover,
+        .profile-buttons .logout-button:hover {
+            background-color: #ff000e;
+            transform: translateY(-2px);
+        }
+        .profile-buttons .button.upload:hover { background-color: #45a049; }
+        .profile-buttons .logout-button:hover { background-color: #da190b; }
+
+        /* --- Grid de Vídeos do Usuário (reaproveitando estilos do home.html) --- */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .video-card {
+            background-color: var(--card-background);
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            position: relative;
+        }
+        .video-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .video-card a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%; /* Garante que o link preencha o card */
+            display: flex;
+            flex-direction: column;
+        }
+        .video-card .thumbnail-wrapper {
+            width: 100%;
+            padding-top: 56.25%; /* Proporção 16:9 */
+            position: relative;
+            overflow: hidden;
+            background-color: #333;
+        }
+        .video-card img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        .video-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .video-card .no-thumbnail {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-gray);
+            font-weight: bold;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        .video-card .info {
+            padding: 12px;
+            background-color: var(--card-background);
+            color: var(--text-gray);
+            font-size: 0.85em;
+            line-height: 1.4;
+            flex-grow: 1; /* Permite que a info ocupe o espaço restante */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Empurra o botão de deletar para baixo */
+        }
+        .video-card h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.05em;
+            color: var(--text-light);
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .video-card p {
+            margin: 0;
+            font-size: 0.8em;
+            color: var(--text-gray);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* Ajuste para o formulário de deletar vídeo no card */
+        .video-card .delete-form {
+            margin-top: 10px; /* Espaçamento acima do botão */
+            text-align: right;
+            position: relative; /* Para o posicionamento absoluto do botão */
+        }
+        .video-card .delete-button {
+            background-color: var(--button-delete); /* Vermelho para deletar */
+            color: white;
+            border: none;
+            border-radius: 50%; /* Círculo */
+            width: 35px;
+            height: 35px;
+            font-size: 1.3em; /* Ícone um pouco maior */
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background-color 0.2s ease-in-out;
+            line-height: 1;
+            padding: 0;
+            position: absolute; /* Posiciona o botão */
+            bottom: 5px; /* Ajuste a posição se necessário */
+            right: 5px;
+        }
+        .video-card .delete-button:hover {
+            background-color: var(--button-delete-hover);
+        }
+
+        /* --- Mensagem de nenhum vídeo/comentário --- */
+        .no-content-message {
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 1.1em;
+            margin-top: 30px;
+        }
+
+        hr { border: 0; border-top: 1px solid var(--border-color); margin: 50px 0; }
+
+        /* --- Seção de Comentários do Usuário --- */
+        .user-comments-section {
+            margin-top: 40px;
+        }
+        .user-comments-section h2 { margin-bottom: 25px; }
+
+        .comment-item {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: relative; /* Para o botão de deletar */
+        }
+        .comment-item p {
+            margin: 0 0 10px 0;
+            font-size: 1em;
+            color: var(--text-light);
+            font-weight: 300;
+        }
+        .comment-item .comment-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85em;
+            color: var(--text-gray);
+        }
+        .comment-item .comment-meta span a { /* Link para o vídeo no comentário */
+            color: var(--netflix-red);
+            font-weight: 400;
+        }
+        .comment-item .comment-meta span a:hover { text-decoration: underline; }
+        .comment-item .comment-meta small {
+            color: var(--text-gray);
+        }
+
+        /* Botão de deletar comentário */
+        .comment-item .delete-comment-form {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            margin: 0;
+        }
+        .comment-item .delete-comment-button {
+            background-color: var(--button-delete);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background-color 0.2s ease-in-out;
+            line-height: 1;
+            padding: 0;
+        }
+        .comment-item .delete-comment-button:hover {
+            background-color: var(--button-delete-hover);
+        }
+
+        /* --- Responsividade --- */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            h1 { font-size: 2em; }
+            h2 { font-size: 1.6em; }
+            .profile-header {
+                text-align: center;
+            }
+            .profile-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .profile-buttons .button,
+            .profile-buttons .logout-button {
+                width: 100%;
+                text-align: center;
+            }
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 10px;
+            }
+            .video-card .info {
+                padding: 10px;
+            }
+            .video-card h3 {
+                font-size: 0.95em;
+            }
+            .video-card .delete-button {
+                width: 30px;
+                height: 30px;
+                font-size: 1.1em;
+            }
+            .comment-item .delete-comment-button {
+                width: 28px;
+                height: 28px;
+                font-size: 1.1em;
+            }
+            .comment-item .comment-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 1.8em; }
+            h2 { font-size: 1.4em; }
+            .back-button {
+                width: 100%;
+                text-align: center;
+            }
+            .video-grid {
+                grid-template-columns: 1fr; /* Uma coluna em telas muito pequenas */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'home' %}" class="back-button">← Voltar para o Hub</a>
+
+        <div class="profile-header">
+            <h1>Perfil de {{ user.username }}</h1>
+            <p>Aqui você pode gerenciar seus vídeos e ver seus comentários.</p>
+            <div class="profile-buttons">
+                <a href="{% url 'upload_video' %}" class="button upload">
+                    + Enviar Novo Vídeo
+                </a>
+                <form action="{% url 'logout' %}" method="post" style="display: inline-block;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">
+                        Sair
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <h2>Seus Vídeos</h2>
+        {% if user_videos %}
+            <div class="video-grid">
+                {% for video in user_videos %}
+                    <div class="video-card">
+                        <a href="{% url 'watch_video' video.id %}"> {# Removi o style inline #}
+                            <div class="thumbnail-wrapper">
+                                {% if video.thumbnail %}
+                                    <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}">
+                                {% else %}
+                                    <div class="no-thumbnail">Sem Thumbnail</div>
+                                {% endif %}
+                            </div>
+                            <div class="info">
+                                <h3>{{ video.title }}</h3>
+                                <p>Publicado em: {{ video.created_at|date:"d/m/Y H:i" }}</p>
+                                <p>Visualizações: {{ video.views }}</p>
+
+                                <form action="{% url 'delete_video' video.id %}" method="post" class="delete-form" onsubmit="return confirm('Tem certeza que deseja deletar o vídeo \'{{ video.title }}\'?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="delete-button" title="Deletar vídeo">
+                                        &#128465; {# Ícone de lixeira (Unicode) #}
+                                    </button>
+                                </form>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-content-message">Você ainda não publicou nenhum vídeo.</p>
+        {% endif %}
+
+        <hr> {# A tag <hr> já está com estilo no CSS #}
+
+        <div class="user-comments-section">
+            <h2>Seus Comentários</h2>
+            {% if user_comments %}
+                {% for comment in user_comments %}
+                    <div class="comment-item">
+                        <p>{{ comment.text }}</p>
+                        <div class="comment-meta">
+                            <span>Em: <a href="{% url 'watch_video' comment.video.id %}">{{ comment.video.title }}</a></span>
+                            <small>{{ comment.created_at|date:"d/m/Y H:i" }}</small>
+
+                            <form action="{% url 'delete_comment' comment.id %}" method="post" class="delete-comment-form"
+                                  onsubmit="return confirm('Tem certeza que deseja deletar este comentário?');">
+                                {% csrf_token %}
+                                <button type="submit" class="delete-comment-button" title="Deletar comentário">
+                                    &#128465; {# Ícone de lixeira (Unicode) #}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="no-content-message">Você ainda não fez nenhum comentário.</p>
+            {% endif %}
+        </div>
+
+    </div>
+</body>
+</html>

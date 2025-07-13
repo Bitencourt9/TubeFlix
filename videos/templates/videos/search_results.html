@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados da Pesquisa - TubeFlix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --netflix-red: #e50914;
+            --netflix-dark: #141414;
+            --text-light: #e5e5e5;
+            --text-gray: #a3a3a3;
+            --card-background: #222;
+            --border-color: #333;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            background-color: var(--netflix-dark);
+            color: var(--text-light);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--netflix-dark);
+            box-shadow: none;
+        }
+
+        .back-button {
+            background-color: var(--card-background);
+            color: var(--text-light);
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 400;
+            display: inline-block;
+            margin-bottom: 30px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            font-size: 0.95em;
+        }
+        .back-button:hover {
+            background-color: #333;
+            transform: translateY(-2px);
+        }
+
+        h1 {
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            font-weight: 700;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .video-card {
+            background-color: var(--card-background);
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
+            position: relative;
+        }
+        .video-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .video-card a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .video-card .thumbnail-wrapper {
+            width: 100%;
+            padding-top: 56.25%;
+            position: relative;
+            overflow: hidden;
+            background-color: #333;
+        }
+        .video-card img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+        .video-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .video-card .no-thumbnail {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-gray);
+            font-weight: bold;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        .video-card .info {
+            padding: 12px;
+            background-color: var(--card-background);
+            color: var(--text-gray);
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+        .video-card h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.05em;
+            color: var(--text-light);
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .video-card p {
+            margin: 0;
+            font-size: 0.8em;
+            color: var(--text-gray);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .no-results-message {
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 1.2em;
+            margin-top: 50px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .back-button {
+                width: 100%;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            h1 {
+                font-size: 2em;
+                margin-bottom: 30px;
+            }
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 10px;
+            }
+            .video-card h3 {
+                font-size: 0.95em;
+            }
+            .video-card .info {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8em;
+            }
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'home' %}" class="back-button">← Voltar para o Hub</a>
+
+        <h1>Resultados da Pesquisa para "{{ query }}"</h1>
+
+        {% if videos %}
+            <div class="video-grid">
+                {% for video in videos %}
+                    <div class="video-card">
+                        <a href="{% url 'watch_video' video.id %}">
+                            <div class="thumbnail-wrapper">
+                                {% if video.thumbnail %}
+                                    <img src="{{ video.thumbnail.url }}" alt="{{ video.title }}">
+                                {% else %}
+                                    <div class="no-thumbnail">Sem Thumbnail</div>
+                                {% endif %}
+                            </div>
+                            <div class="info">
+                                <h3>{{ video.title }}</h3>
+                                <p>Por: {{ video.user.username }}</p>
+                                <p>Publicado em: {{ video.created_at|date:"d/m/Y H:i" }}</p>
+                                <p>Visualizações: {{ video.views }}</p>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-results-message">Nenhum vídeo encontrado para "{{ query }}".</p>
+        {% endif %}
+    </div>
+</body>
+</html>
