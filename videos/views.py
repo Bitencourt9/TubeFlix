@@ -1,13 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Video
 from .forms import VideoUploadForm
 from comments.forms import CommentForm
-from comments.models import Comment
 from django.contrib import messages
 from comments.models import Comment
 from django.db.models import Q
-from .models import Video, Like
+from .models import Video, Like, Comment
 
 
 def watch_video(request, video_id):
