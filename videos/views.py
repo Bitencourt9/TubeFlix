@@ -5,7 +5,7 @@ from comments.forms import CommentForm
 from django.contrib import messages
 from comments.models import Comment
 from django.db.models import Q
-from .models import Video, Like, Comment
+from .models import Video, Like
 
 
 def watch_video(request, video_id):
