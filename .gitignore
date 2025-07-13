@@ -1,0 +1,36 @@
+# Ignorar pastas e arquivos gerados pelo Python/Django
+__pycache__/
+*.pyc
+*.sqlite3  # Ignora qualquer arquivo .sqlite3, incluindo db.sqlite3
+.Python
+.venv/
+venv/
+env/
+
+# Ignorar uploads de mídia e arquivos estáticos coletados
+# `media/` é a pasta padrão do Django para uploads de usuários
+media/
+# `static/` geralmente é onde o Django coleta arquivos estáticos em produção
+static/
+
+# Ignorar variáveis de ambiente e arquivos de configuração local
+# Crucial para segurança!
+.env
+.flaskenv
+.ipynb_checkpoints/
+
+# Ignorar arquivos de log
+*.log
+celerybeat-schedule
+
+# Ignorar arquivos de IDEs (como VS Code, Sublime Text, PyCharm, etc.)
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.iml
+
+# Ignorar arquivos Docker específicos do ambiente local
+# Nao ignorar Dockerfile e docker-compose.yml
+.dockerignore
+docker-compose.override.yml

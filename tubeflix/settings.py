@@ -10,8 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
-import os # <--- MOVA ESTA LINHA PARA CÁ (se ainda não estiver)
+import os
 from pathlib import Path
+from dotenv import load_dotenv # <-- NOVA LINHA: Importa load_dotenv
+
+# Carrega as variáveis de ambiente do arquivo .env
+# Certifique-se de que o arquivo .env está na raiz do seu projeto
+load_dotenv() # <-- NOVA LINHA: Carrega as variáveis de ambiente
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +27,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-)#ze!g_j+9b_*z75!d%_)^!d+o)_9g2z3+a2mmb-92_)0$v$1)'
+# Lendo a SECRET_KEY das variáveis de ambiente para segurança
+# O segundo argumento é uma chave de fallback (APENAS para desenvolvimento, NUNCA em produção real)
+SECRET_KEY = os.getenv('SECRET_KEY', 'default-insecure-key-for-dev-only-change-this-for-real-projects')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Lendo DEBUG das variáveis de ambiente. Converte '1' para True e '0' para False.
+DEBUG = os.getenv('DEBUG', '0') == '1'
 
-ALLOWED_HOSTS = []
+# Lendo ALLOWED_HOSTS das variáveis de ambiente, separando por vírgula
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 
 # Application definition
@@ -59,8 +69,7 @@ ROOT_URLCONF = 'tubeflix.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        # ALTERE ESTA LINHA AQUI:
-        'DIRS': [BASE_DIR / 'templates'], # <--- AGORA USA O OPERADOR DE BARRA '/'
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,11 +86,15 @@ WSGI_APPLICATION = 'tubeflix.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# MUDANÇA CRÍTICA AQUI: Usando PostgreSQL com variáveis de ambiente do Docker Compose
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql', # Define o engine para PostgreSQL
+        'NAME': os.getenv('POSTGRES_DB'),         # Nome do BD, lido do .env
+        'USER': os.getenv('POSTGRES_USER'),       # Usuário do BD, lido do .env
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'), # Senha do BD, lida do .env
+        'HOST': os.getenv('POSTGRES_HOST'),       # Host do BD, lido do .env (será 'db' por causa do docker-compose.yml)
+        'PORT': os.getenv('POSTGRES_PORT'),       # Porta do BD, lida do .env
     }
 }
 
@@ -121,6 +134,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+# STATIC_ROOT = BASE_DIR / 'staticfiles' # Descomente e configure para produção
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/videos/profile/'
 
