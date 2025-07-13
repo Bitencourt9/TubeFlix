@@ -3,17 +3,16 @@ version: '3.8'
 services:
   web:
     build: .
-    command: sh -c "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn --bind 0.0.0.0:8000 tubeflix.wsgi:application"
+    command: sh -c "python manage.py migrate && gunicorn --bind 0.0.0.0:8000 tubeflix.wsgi:application"
     volumes:
       - .:/app
       - media_data:/app/media
-      - static_data:/app/staticfiles
     ports:
       - "8000:8000"
     env_file:
       - .env
     depends_on:
-      db: # AQUI ESTÁ A MUDANÇA: Agora o 'web' espera que o 'db' esteja saudável
+      db:
         condition: service_healthy
 
   db:
@@ -22,14 +21,13 @@ services:
       - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env
-    healthcheck: # <-- NOVO: Define um healthcheck para o serviço de banco de dados
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"] # Comando para verificar se o BD está pronto
-      interval: 5s # Verifica a cada 5 segundos
-      timeout: 5s # Tempo limite para o comando
-      retries: 5 # Número de tentativas antes de considerar o serviço não saudável
-      start_period: 10s # Período inicial para o serviço iniciar antes de começar a checar
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 volumes:
   postgres_data:
   media_data:
-  static_data:
